@@ -1,6 +1,8 @@
 use std::io::Write;
 use std::time::{Duration, Instant};
 
+const TICK_FORMAT: &str = "\\|/-";
+
 // Output type format,
 // indicate which format wil be used in the speed box.
 #[derive(Debug)]
@@ -56,4 +58,26 @@ impl<T: Write> ProgressBar<T> {
             self.bar_end = v[5].to_owned();
         }
     }
-}
+
+    /// Set tick format for the progressBar, default is \\|/-
+    ///
+    /// Format is not limited to 4 characters,
+    /// any string can be used as a tick format
+    /// (the tick will successively take the value of
+    /// each char but won't loop backwards).
+    ///
+    /// # Examples
+    /// ```ignore
+    /// let mut pb = ProgressBar::new(...);
+    /// pb.tick_format("▀▐▄▌")
+    /// ```
+    pub fn tick_format(&mut self, tick_fmt: &str) {
+        if tick_fmt != TICK_FORMAT {
+            self.show_tick = true;
+        }
+        self.tick = tick_fmt
+            .split("")
+            .map(|x| x.to_owned())
+            .filter(|x| !x.is_empty())
+            .collect();
+    }
