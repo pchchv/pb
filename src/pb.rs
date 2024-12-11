@@ -36,3 +36,24 @@ pub struct ProgressBar<T: Write> {
     pub show_message: bool,
     handle: T,
 }
+
+impl<T: Write> ProgressBar<T> {
+    /// Set custom format to the drawing bar, default is `[=>-]`
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// let mut pb = ProgressBar::new(...);
+    /// pb.format("[=>_]");
+    /// ```
+    pub fn format(&mut self, fmt: &str) {
+        if fmt.len() >= 5 {
+            let v: Vec<&str> = fmt.split("").collect();
+            self.bar_start = v[1].to_owned();
+            self.bar_current = v[2].to_owned();
+            self.bar_current_n = v[3].to_owned();
+            self.bar_remain = v[4].to_owned();
+            self.bar_end = v[5].to_owned();
+        }
+    }
+}
