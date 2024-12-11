@@ -1,6 +1,7 @@
 use std::io::Write;
 use std::time::{Duration, Instant};
 
+const FORMAT: &str = "[=>-]";
 const TICK_FORMAT: &str = "\\|/-";
 
 // Output type format,
@@ -81,3 +82,56 @@ impl<T: Write> ProgressBar<T> {
             .filter(|x| !x.is_empty())
             .collect();
     }
+
+    /// Create a new ProgressBar with default configuration
+    /// but pass an arbitrary writer.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use std::thread;
+    /// use std::io::stderr;
+    /// use pbr::{ProgressBar, Units};
+    ///
+    /// let count = 1000;
+    /// let mut pb = ProgressBar::on(stderr(), count);
+    /// pb.set_units(Units::Bytes);
+    ///
+    /// for _ in 0..count {
+    ///    pb.inc();
+    ///    thread::sleep_ms(100);
+    /// }
+    /// ```
+    pub fn on(handle: T, total: u64) -> ProgressBar<T> {
+        let mut pb = ProgressBar {
+            total,
+            current: 0,
+            start_time: Instant::now(),
+            units: Units::Default,
+            is_finish: false,
+            is_multibar: false,
+            show_bar: true,
+            show_speed: true,
+            show_percent: true,
+            show_counter: true,
+            show_time_left: true,
+            show_tick: false,
+            show_message: true,
+            bar_start: String::new(),
+            bar_current: String::new(),
+            bar_current_n: String::new(),
+            bar_remain: String::new(),
+            bar_end: String::new(),
+            tick: Vec::new(),
+            tick_state: 0,
+            width: None,
+            message: String::new(),
+            last_refresh_time: Instant::now(),
+            max_refresh_rate: None,
+            handle,
+        };
+        pb.format(FORMAT);
+        pb.tick_format(TICK_FORMAT);
+        pb
+    }
+}
