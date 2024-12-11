@@ -159,4 +159,31 @@ impl<T: Write> ProgressBar<T> {
         pb.tick_format(TICK_FORMAT);
         pb
     }
+
+    /// Set width, or `None` for default.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// let mut pb = ProgressBar::new(...);
+    /// pb.set_width(Some(80));
+    /// ```
+    pub fn set_width(&mut self, w: Option<usize>) {
+        self.width = w;
+    }
+
+    /// Set units, default is simple numbers.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use pbr::{ProgressBar, Units};
+    ///
+    /// let n_bytes = 100;
+    /// let mut pb = ProgressBar::new(n_bytes);
+    /// pb.set_units(Units::Bytes);
+    /// ```
+    pub fn set_units(&mut self, u: Units) {
+        self.units = u;
+    }
 }
