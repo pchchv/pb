@@ -1,4 +1,5 @@
 use std::io::Write;
+use std::io::Stdout;
 use std::time::{Duration, Instant};
 
 const FORMAT: &str = "[=>-]";
@@ -38,6 +39,30 @@ pub struct ProgressBar<T: Write> {
     pub show_tick: bool,
     pub show_message: bool,
     handle: T,
+}
+
+impl ProgressBar<Stdout> {
+    /// Create a new ProgressBar with default configuration.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use std::thread;
+    /// use pbr::{ProgressBar, Units};
+    ///
+    /// let count = 1000;
+    /// let mut pb = ProgressBar::new(count);
+    /// pb.set_units(Units::Bytes);
+    ///
+    /// for _ in 0..count {
+    ///    pb.inc();
+    ///    thread::sleep_ms(100);
+    /// }
+    /// ```
+    pub fn new(total: u64) -> ProgressBar<Stdout> {
+        let handle = ::std::io::stdout();
+        ProgressBar::on(handle, total)
+    }
 }
 
 impl<T: Write> ProgressBar<T> {
