@@ -2,3 +2,4 @@
 //!
 //! Console progress bar for Rust.
 mod pb;
+mod tty;
