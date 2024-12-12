@@ -505,7 +505,7 @@ mod test {
                 == fmt
         );
     }
-    
+
     #[test]
     fn add() {
         let mut pb = ProgressBar::new(10);
@@ -516,3 +516,19 @@ mod test {
             "add should return the current value"
         );
     }
+
+    #[test]
+    fn finish() {
+        let mut pb = ProgressBar::new(10);
+        pb.finish();
+        assert!(pb.current == pb.total, "should set current to total");
+        assert!(pb.is_finish, "should set is_finish to true");
+    }
+
+    #[test]
+    fn inc() {
+        let mut pb = ProgressBar::new(10);
+        pb.inc();
+        assert!(pb.current == 1, "should increment current by 1");
+    }
+}
