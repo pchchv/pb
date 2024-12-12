@@ -490,3 +490,29 @@ impl<T: Write> Write for ProgressBar<T> {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::pb::ProgressBar;
+
+    #[test]
+    fn format() {
+        let fmt = "[~> ]";
+        let mut pb = ProgressBar::new(1);
+        pb.format(fmt);
+        assert!(
+            pb.bar_start + &pb.bar_current + &pb.bar_current_n + &pb.bar_remain + &pb.bar_end
+                == fmt
+        );
+    }
+    
+    #[test]
+    fn add() {
+        let mut pb = ProgressBar::new(10);
+        pb.add(2);
+        assert!(pb.current == 2, "should add the given `n` to current");
+        assert!(
+            pb.add(2) == pb.current,
+            "add should return the current value"
+        );
+    }
