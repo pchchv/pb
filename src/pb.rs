@@ -414,3 +414,44 @@ impl<T: Write> ProgressBar<T> {
         self.finish_draw();
         self.handle.write(b"").expect("write() failed");
     }
+
+    /// Update progress bar even though no progress are
+    /// made useful to see if a program is bricked or
+    /// just not doing any progress.
+    ///
+    /// tick is not needed with add or
+    /// inc as performed operation take
+    /// place in draw function.
+    ///
+    /// # Examples
+    /// ```ignore
+    /// let mut pb = ProgressBar::new(...);
+    /// pb.inc();
+    /// for _ in ... {
+    ///    ...do something
+    ///    pb.tick();
+    /// }
+    /// pb.finish();
+    /// ```
+    pub fn tick(&mut self) {
+        self.tick_state = (self.tick_state + 1) % self.tick.len();
+        if self.current <= self.total {
+            self.draw()
+        }
+    }
+
+    /// Manually set the current value of the bar.
+    ///
+    /// # Examples
+    /// ```no_run
+    /// use pbr::ProgressBar;
+    ///
+    /// let mut pb = ProgressBar::new(10);
+    /// pb.set(8);
+    /// pb.finish();
+    pub fn set(&mut self, i: u64) -> u64 {
+        self.current = i;
+        self.tick();
+        self.current
+    }
+}
