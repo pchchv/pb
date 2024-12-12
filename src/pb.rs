@@ -562,4 +562,32 @@ mod test {
             "\r0 B / 10 B [---------------------------------------------] 0 B/s ",
         );
     }
+
+    #[test]
+    fn disable_speed_time_left() {
+        let mut out = Vec::new();
+        let mut pb = ProgressBar::on(&mut out, 10);
+        pb.show_speed = false;
+        pb.show_time_left = false;
+        pb.set_width(Some(65));
+        pb.add(1);
+        assert_eq!(
+            std::str::from_utf8(&out).unwrap(),
+            "\r1 / 10 [====>------------------------------------------] 10.00 % ",
+        );
+    }
+
+    #[test]
+    fn disable_speed_percent() {
+        let mut out = Vec::new();
+        let mut pb = ProgressBar::on(&mut out, 10);
+        pb.show_speed = false;
+        pb.show_percent = false;
+        pb.set_width(Some(80));
+        pb.add(2);
+        assert_eq!(
+            std::str::from_utf8(&out).unwrap(),
+            "\r2 / 10 [=============>-----------------------------------------------------] 0s ",
+        );
+    }
 }
