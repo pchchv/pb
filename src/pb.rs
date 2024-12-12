@@ -494,6 +494,7 @@ impl<T: Write> Write for ProgressBar<T> {
 #[cfg(test)]
 mod test {
     use crate::pb::{ProgressBar, Units};
+    use std::time::Duration;
 
     #[test]
     fn format() {
@@ -588,6 +589,32 @@ mod test {
         assert_eq!(
             std::str::from_utf8(&out).unwrap(),
             "\r2 / 10 [=============>-----------------------------------------------------] 0s ",
+        );
+    }
+
+    #[test]
+    fn max_refresh_rate_finish() {
+        let count = 500;
+        let mut out = Vec::new();
+        let mut pb = ProgressBar::on(&mut out, count);
+        pb.format("╢▌▌░╟");
+        pb.set_width(Some(80));
+        pb.set_max_refresh_rate(Some(Duration::from_millis(100)));
+        pb.show_speed = false;
+        pb.show_time_left = false;
+        pb.add(count / 2);
+        pb.add(count / 2);
+        let mut split = std::str::from_utf8(&out)
+            .unwrap()
+            .trim_start_matches('\r')
+            .split('\r');
+        assert_eq!(
+            split.next(),
+            Some("250 / 500 ╢▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟ 50.00 %")
+        );
+        assert_eq!(
+            split.next(),
+            Some("500 / 500 ╢▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌╟ 100.00 %")
         );
     }
 }
