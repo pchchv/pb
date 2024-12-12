@@ -493,7 +493,7 @@ impl<T: Write> Write for ProgressBar<T> {
 
 #[cfg(test)]
 mod test {
-    use crate::pb::ProgressBar;
+    use crate::pb::{ProgressBar, Units};
 
     #[test]
     fn format() {
@@ -530,5 +530,36 @@ mod test {
         let mut pb = ProgressBar::new(10);
         pb.inc();
         assert!(pb.current == 1, "should increment current by 1");
+    }
+
+    #[test]
+    fn disable_suffix() {
+        let mut out = Vec::new();
+        let mut pb = ProgressBar::on(&mut out, 10);
+        pb.show_speed = false;
+        pb.show_percent = false;
+        pb.show_time_left = false;
+        pb.set_units(Units::Bytes);
+        pb.set_width(Some(65));
+        pb.draw();
+        assert_eq!(
+            std::str::from_utf8(&out).unwrap(),
+            "\r0 B / 10 B [--------------------------------------------------]  ",
+        );
+    }
+
+    #[test]
+    fn disable_percent_time_left() {
+        let mut out = Vec::new();
+        let mut pb = ProgressBar::on(&mut out, 10);
+        pb.show_percent = false;
+        pb.show_time_left = false;
+        pb.set_units(Units::Bytes);
+        pb.set_width(Some(65));
+        pb.draw();
+        assert_eq!(
+            std::str::from_utf8(&out).unwrap(),
+            "\r0 B / 10 B [---------------------------------------------] 0 B/s ",
+        );
     }
 }
