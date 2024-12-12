@@ -21,3 +21,15 @@ macro_rules! printfl {
 
 mod pb;
 mod tty;
+use std::io::Write;
+pub use pb::ProgressBar;
+
+
+pub struct PbIter<T, I>
+where
+I: Iterator,
+T: Write,
+{
+    iter: I,
+    progress_bar: ProgressBar<T>,
+}
