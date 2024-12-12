@@ -203,4 +203,33 @@ impl<T: Write> ProgressBar<T> {
             self.last_refresh_time = self.last_refresh_time - dur;
         }
     }
+
+    /// Resets the start time to now
+    pub fn reset_start_time(&mut self) {
+        self.start_time = Instant::now();
+    }
+
+    /// Set message to display in the prefix,
+    /// call with "" to stop printing a message.
+    ///
+    /// All newlines are replaced with spaces.
+    ///
+    /// # Examples
+    /// ```ignore
+    /// let mut pb = ProgressBar::new(20);
+    ///
+    /// for x in 0..20 {
+    ///    match x {
+    ///       0 => pb.message("Doing 1st Quarter"),
+    ///       5 => pb.message("Doing 2nd Quarter"),
+    ///       10 => pb.message("Doing 3rd Quarter"),
+    ///       15 => pb.message("Doing 4th Quarter"),
+    ///    }
+    ///    pb.inc().
+    /// }
+    ///
+    /// ```
+    pub fn message(&mut self, message: &str) {
+        self.message = message.replace(['\n', '\r'], " ")
+    }
 }
