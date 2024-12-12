@@ -1,4 +1,4 @@
-use std::io::{Stdout, Write};
+use std::io::{self, Stdout, Write};
 use std::time::{Duration, Instant};
 use crate::tty::{terminal_size, Width};
 
@@ -475,5 +475,18 @@ impl<T: Write> ProgressBar<T> {
     /// Increment current value.
     pub fn inc(&mut self) -> u64 {
         self.add(1)
+    }
+}
+
+// Implement io::Writer.
+impl<T: Write> Write for ProgressBar<T> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        let n = buf.len();
+        self.add(n as u64);
+        Ok(n)
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        Ok(())
     }
 }
