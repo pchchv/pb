@@ -1,6 +1,7 @@
 use std::io::Write;
 use std::io::Stdout;
 use std::time::{Duration, Instant};
+use crate::tty::{terminal_size, Width};
 
 const FORMAT: &str = "[=>-]";
 const TICK_FORMAT: &str = "\\|/-";
@@ -231,5 +232,16 @@ impl<T: Write> ProgressBar<T> {
     /// ```
     pub fn message(&mut self, message: &str) {
         self.message = message.replace(['\n', '\r'], " ")
+    }
+
+    /// Get terminal width, from configuration, terminal size, or default(80)
+    fn width(&mut self) -> usize {
+        if let Some(w) = self.width {
+            w
+        } else if let Some((Width(w), _)) = terminal_size() {
+            w as usize
+        } else {
+            80
+        }
     }
 }
