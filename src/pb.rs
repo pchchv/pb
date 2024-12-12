@@ -186,4 +186,21 @@ impl<T: Write> ProgressBar<T> {
     pub fn set_units(&mut self, u: Units) {
         self.units = u;
     }
+
+    /// Set max refresh rate,
+    /// above which the progress bar will not redraw,
+    /// or `None` for none.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// let mut pb = ProgressBar::new(...);
+    /// pb.set_max_refresh_rate(Some(Duration::from_millis(100)));
+    /// ```
+    pub fn set_max_refresh_rate(&mut self, w: Option<Duration>) {
+        self.max_refresh_rate = w;
+        if let Some(dur) = self.max_refresh_rate {
+            self.last_refresh_time = self.last_refresh_time - dur;
+        }
+    }
 }
