@@ -256,4 +256,106 @@ impl<T: Write> ProgressBar<T> {
             80
         }
     }
+
+    fn draw(&mut self) {
+        let now = Instant::now();
+        if let Some(mrr) = self.max_refresh_rate {
+            if now - self.last_refresh_time < mrr && self.current < self.total {
+                return;
+            }
+        }
+
+        let mut time_elapsed = now - self.start_time;
+        if time_elapsed.is_zero() {
+            time_elapsed = Duration::from_nanos(1);
+        }
+
+        let speed = self.current as f64 / time_elapsed.as_secs_f64();
+        let width = self.width();
+        let mut out;
+        let mut parts = Vec::new();
+        let mut base = String::new();
+        let mut prefix = String::new();
+        let mut suffix = String::from(" ");
+        // precent box
+        if self.show_percent {
+            let percent = self.current as f64 / (self.total as f64 / 100f64);
+            parts.push(format!(
+                "{:.*} %",
+                2,
+                if percent.is_nan() { 0.0 } else { percent }
+            ));
+        }
+
+        // speed box
+        if self.show_speed {
+            match self.units {
+                Units::Default => parts.push(format!("{:.*}/s", 2, speed)),
+                Units::Bytes => parts.push(format!("{}/s", kb_fmt!(speed))),
+            };
+        }
+
+        // time left box
+        if self.show_time_left && self.current > 0 && self.total > self.current {
+            let left = 1. / speed * (self.total - self.current) as f64;
+            if left < 60. {
+                parts.push(format!("{:.0}s", left));
+            } else {
+                parts.push(format!("{:.0}m", left / 60.));
+            };
+        }
+
+        suffix += &parts.join(" ");
+        // message box
+        if self.show_message {
+            prefix = prefix + &self.message;
+        }
+
+        // counter box
+        if self.show_counter {
+            let (c, t) = (self.current as f64, self.total as f64);
+            prefix = prefix
+                + &match self.units {
+                    Units::Default => format!("{} / {} ", c, t),
+                    Units::Bytes => format!("{} / {} ", kb_fmt!(c), kb_fmt!(t)),
+                };
+        }
+
+        // tick box
+        if self.show_tick {
+            prefix = prefix + &format!("{} ", self.tick[self.tick_state]);
+        }
+
+        // bar box
+        if self.show_bar {
+            let p = prefix.chars().count() + suffix.chars().count() + 3;
+            if p < width {
+                let size = width - p;
+                let curr_count =
+                    ((self.current as f64 / self.total as f64) * size as f64).ceil() as usize;
+                if size >= curr_count {
+                    let rema_count = size - curr_count;
+                    base = self.bar_start.clone();
+                    if rema_count > 0 && curr_count > 0 {
+                        base =
+                            base + &self.bar_current.repeat(curr_count - 1) + &self.bar_current_n;
+                    } else {
+                        base = base + &self.bar_current.repeat(curr_count);
+                    }
+                    base = base + &self.bar_remain.repeat(rema_count) + &self.bar_end;
+                }
+            }
+        }
+
+        out = prefix + &base + &suffix;
+        // pad
+        if out.len() < width {
+            let gap = width - out.len();
+            out = out + &" ".repeat(gap);
+        }
+
+        printfl!(self.handle, "\r{}", out);
+
+        self.last_refresh_time = Instant::now();
+    }
 }
