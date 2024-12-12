@@ -381,3 +381,36 @@ impl<T: Write> ProgressBar<T> {
 
         self.is_finish = true;
     }
+
+    /// Call finish and write string `s` that will replace the progress bar.
+    pub fn finish_print(&mut self, s: &str) {
+        self.finish_draw();
+        let width = self.width();
+        let mut out = s.to_owned();
+        if s.len() < width {
+            out += &" ".repeat(width - s.len());
+        };
+
+        printfl!(self.handle, "\r{}", out);
+        self.finish();
+    }
+    
+    /// Call finish and write string `s` below the progress bar.
+    /// If the ProgressBar is part of MultiBar instance,
+    /// you should use `finish_print` to print message.
+    pub fn finish_println(&mut self, s: &str) {
+        // `finish_println` does not allow in MultiBar mode, because printing
+        // new line will break the multiBar output.
+        if self.is_multibar {
+            return self.finish_print(s);
+        }
+        self.finish_draw();
+        printfl!(self.handle, "\n{}", s);
+    }
+
+    /// Calling finish manually will set current to
+    /// total and draw the last time.
+    pub fn finish(&mut self) {
+        self.finish_draw();
+        self.handle.write(b"").expect("write() failed");
+    }
