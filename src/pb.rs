@@ -1,5 +1,4 @@
-use std::io::Write;
-use std::io::Stdout;
+use std::io::{Stdout, Write};
 use std::time::{Duration, Instant};
 use crate::tty::{terminal_size, Width};
 
