@@ -358,4 +358,26 @@ impl<T: Write> ProgressBar<T> {
 
         self.last_refresh_time = Instant::now();
     }
-}
+
+    // finish_draw ensure that the progress bar is reached to its end,
+    // and do the last drawing if needed.
+    fn finish_draw(&mut self) {
+        let mut redraw = false;
+        if let Some(mrr) = self.max_refresh_rate {
+            if Instant::now() - self.last_refresh_time < mrr {
+                self.max_refresh_rate = None;
+                redraw = true;
+            }
+        }
+
+        if self.current < self.total {
+            self.current = self.total;
+            redraw = true;
+        }
+
+        if redraw {
+            self.draw();
+        }
+
+        self.is_finish = true;
+    }
