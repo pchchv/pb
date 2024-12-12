@@ -617,4 +617,16 @@ mod test {
             Some("500 / 500 ╢▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌╟ 100.00 %")
         );
     }
+
+    #[test]
+    fn kb_fmt() {
+        let kb = 1024f64;
+        let mb = kb.powf(2f64);
+        let gb = kb.powf(3f64);
+        let tb = kb.powf(4f64);
+        assert_eq!(kb_fmt!(kb), "1.00 KB");
+        assert_eq!(kb_fmt!(mb), "1.00 MB");
+        assert_eq!(kb_fmt!(gb), "1.00 GB");
+        assert_eq!(kb_fmt!(tb), "1.00 TB");
+    }
 }
