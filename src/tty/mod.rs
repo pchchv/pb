@@ -18,3 +18,8 @@ pub use self::unix::*;
 mod wasi;
 #[cfg(target_os = "wasi")]
 pub use self::wasi::*;
+
+#[cfg(windows)]
+mod windows;
+#[cfg(windows)]
+pub use self::windows::*;
