@@ -21,6 +21,7 @@ macro_rules! printfl {
 
 mod pb;
 mod tty;
+mod multi;
 pub use pb::{ProgressBar, Units};
 use std::io::{stdout, Stdout, Write};
 
