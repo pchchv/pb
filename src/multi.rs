@@ -1,5 +1,8 @@
 use std::sync::Mutex;
 use std::str::from_utf8;
+use std::io::{Write, Result};
+use std::sync::atomic::AtomicUsize;
+use crossbeam_channel::{Receiver, Sender};
 
 struct State<T: Write> {
     lines: Vec<String>,
