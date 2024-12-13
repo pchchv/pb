@@ -21,8 +21,8 @@ macro_rules! printfl {
 
 mod pb;
 mod tty;
-use std::io::Write;
 pub use pb::ProgressBar;
+use std::io::{stdout, Stdout, Write};
 
 
 pub struct PbIter<T, I>
@@ -33,7 +33,6 @@ T: Write,
     iter: I,
     progress_bar: ProgressBar<T>,
 }
-
 
 impl<T, I> PbIter<T, I>
 where
@@ -46,5 +45,14 @@ T: Write,
             iter,
             progress_bar: ProgressBar::on(handle, size as u64),
         }
+    }
+}
+
+impl<I> PbIter<Stdout, I>
+where
+I: Iterator,
+{
+    pub fn new(iter: I) -> Self {
+        Self::on(stdout(), iter)
     }
 }
