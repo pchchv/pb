@@ -13,3 +13,8 @@ pub struct Height(pub u16);
 mod unix;
 #[cfg(unix)]
 pub use self::unix::*;
+
+#[cfg(target_os = "wasi")]
+mod wasi;
+#[cfg(target_os = "wasi")]
+pub use self::wasi::*;
