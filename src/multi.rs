@@ -1,7 +1,7 @@
 use std::sync::Mutex;
 use std::str::from_utf8;
-use std::io::{Write, Result};
 use std::sync::atomic::AtomicUsize;
+use std::io::{Write, Result, Stdout};
 use crossbeam_channel::{Receiver, Sender, unbounded};
 
 struct State<T: Write> {
@@ -22,6 +22,52 @@ pub struct MultiBar<T: Write> {
     state: Mutex<State<T>>,
     chan: (Sender<WriteMsg>, Receiver<WriteMsg>),
     nbars: AtomicUsize,
+}
+
+impl MultiBar<Stdout> {
+    /// Create a new MultiBar with stdout as a writer.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use std::thread;
+    /// use pbr::MultiBar;
+    /// use std::time::Duration;
+    ///
+    /// let mut mb = MultiBar::new();
+    /// mb.println("Application header:");
+    ///
+    /// # let count = 250;
+    /// let mut p1 = mb.create_bar(count);
+    /// let _ = thread::spawn(move || {
+    ///     for _ in 0..count {
+    ///         p1.inc();
+    ///         thread::sleep(Duration::from_millis(100));
+    ///     }
+    ///     // notify the multibar that this bar finished.
+    ///     p1.finish();
+    /// });
+    ///
+    /// mb.println("add a separator between the two bars");
+    ///
+    /// let mut p2 = mb.create_bar(count * 2);
+    /// let _ = thread::spawn(move || {
+    ///     for _ in 0..count * 2 {
+    ///         p2.inc();
+    ///         thread::sleep(Duration::from_millis(100));
+    ///     }
+    ///     // notify the multibar that this bar finished.
+    ///     p2.finish();
+    /// });
+    ///
+    /// // start listen to all bars changes.
+    /// // this is a blocking operation, until all bars will finish.
+    /// // to ignore blocking, you can run it in a different thread.
+    /// mb.listen();
+    /// ```
+    pub fn new() -> MultiBar<Stdout> {
+        MultiBar::on(::std::io::stdout())
+    }
 }
 
 impl<T: Write> MultiBar<T> {
