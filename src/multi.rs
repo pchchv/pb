@@ -1,4 +1,5 @@
 use std::sync::Mutex;
+use crate::ProgressBar;
 use std::str::from_utf8;
 use crate::tty::move_cursor_up;
 use std::io::{Write, Result, Stdout};
@@ -152,6 +153,57 @@ impl<T: Write> MultiBar<T> {
 
             printfl!(state.handle, "{}", out);
         }
+    }
+
+    /// create_bar creates new `ProgressBar` with `Pipe` as the writer.
+    /// The ordering of the method calls is important.
+    /// It means that in the first call,
+    /// you get a progress bar in level 1, in the 2nd call,
+    /// you get a progress bar in level 2, and so on.
+    ///
+    /// ProgressBar that finish its work, must call `finish()` (or `finish_print`)
+    /// to notify the `MultiBar` about it.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use pbr::MultiBar;
+    ///
+    /// let mut mb = MultiBar::new();
+    /// # let (count1, count2, count3) = (250, 62500, 15625000);
+    ///
+    /// // progress bar in level 1
+    /// let mut p1 = mb.create_bar(count1);
+    /// // ...
+    ///
+    /// // progress bar in level 2
+    /// let mut p2 = mb.create_bar(count2);
+    /// // ...
+    ///
+    /// // progress bar in level 3
+    /// let mut p3 = mb.create_bar(count3);
+    ///
+    /// // ...
+    /// mb.listen();
+    /// ```
+    pub fn create_bar(&self, total: u64) -> ProgressBar<Pipe> {
+        let mut state = self.state.lock().unwrap();
+        state.lines.push(String::new());
+        state.nlines += 1;
+
+        self.nbars.fetch_add(1, Ordering::SeqCst);
+
+        let mut p = ProgressBar::on(
+            Pipe {
+                level: state.nlines - 1,
+                chan: self.chan.0.clone(),
+            },
+            total,
+        );
+
+        p.is_multibar = true;
+        p.add(0);
+        p
     }
 }
 
