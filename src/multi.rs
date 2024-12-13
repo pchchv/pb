@@ -1,7 +1,8 @@
 use std::sync::Mutex;
 use std::str::from_utf8;
-use std::sync::atomic::AtomicUsize;
+use crate::tty::move_cursor_up;
 use std::io::{Write, Result, Stdout};
+use std::sync::atomic::{AtomicUsize, Ordering};
 use crossbeam_channel::{Receiver, Sender, unbounded};
 
 struct State<T: Write> {
@@ -93,6 +94,63 @@ impl<T: Write> MultiBar<T> {
             }),
             chan: unbounded(),
             nbars: AtomicUsize::new(0),
+        }
+    }
+
+    /// listen start listen to all bars changes.
+    /// `ProgressBar` that finish its work,
+    /// must call `finish()` (or `finish_print`)
+    /// to notify the `MultiBar` about it.
+    ///
+    /// This is a blocking operation and blocks until all bars will finish.
+    /// To ignore blocking, you can run it in a different thread.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use std::thread;
+    /// use pbr::MultiBar;
+    ///
+    /// let mut mb = MultiBar::new();
+    ///
+    /// // ...
+    /// // create some bars here
+    /// // ...
+    ///
+    /// thread::spawn(move || {
+    ///     mb.listen();
+    ///     println!("all bars done!");
+    /// });
+    ///
+    /// // ...
+    /// ```
+    pub fn listen(&self) {
+        let mut first = true;
+        let mut out = String::new();
+        while self.nbars.load(Ordering::SeqCst) > 0 {
+            // receive message
+            let msg = self.chan.1.recv().unwrap();
+            if msg.done {
+                self.nbars.fetch_sub(1, Ordering::SeqCst);
+                continue;
+            }
+
+            out.clear();
+            let mut state = self.state.lock().unwrap();
+            state.lines[msg.level] = msg.string;
+
+            // and draw
+            if !first {
+                out += &move_cursor_up(state.nlines);
+            } else {
+                first = false;
+            }
+
+            for l in state.lines.iter() {
+                out.push_str(&format!("\r{}\n", l));
+            }
+
+            printfl!(state.handle, "{}", out);
         }
     }
 }
