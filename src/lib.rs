@@ -21,7 +21,7 @@ macro_rules! printfl {
 
 mod pb;
 mod tty;
-pub use pb::ProgressBar;
+pub use pb::{ProgressBar, Units};
 use std::io::{stdout, Stdout, Write};
 
 
@@ -72,5 +72,9 @@ T: Write,
             }
             None => None,
         }
+    }
+    
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.iter.size_hint()
     }
 }
