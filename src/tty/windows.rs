@@ -31,3 +31,32 @@ pub fn move_cursor_up(n: usize) -> String {
     }
     "".to_string()
 }
+
+fn get_csbi() -> Option<(winapi::shared::ntdef::HANDLE, winapi::um::wincon::CONSOLE_SCREEN_BUFFER_INFO)> {
+    use winapi::shared::ntdef::HANDLE;
+    use winapi::um::processenv::GetStdHandle;
+    use winapi::um::winbase::STD_OUTPUT_HANDLE;
+    use winapi::um::wincon::{
+        GetConsoleScreenBufferInfo, CONSOLE_SCREEN_BUFFER_INFO, COORD, SMALL_RECT,
+    };
+
+    let hand: HANDLE = unsafe { GetStdHandle(STD_OUTPUT_HANDLE) };
+    let zc = COORD { X: 0, Y: 0 };
+    let mut csbi = CONSOLE_SCREEN_BUFFER_INFO {
+        dwSize: zc.clone(),
+        dwCursorPosition: zc.clone(),
+        wAttributes: 0,
+        srWindow: SMALL_RECT {
+            Left: 0,
+            Top: 0,
+            Right: 0,
+            Bottom: 0,
+        },
+        dwMaximumWindowSize: zc,
+    };
+    
+    match unsafe { GetConsoleScreenBufferInfo(hand, &mut csbi) } {
+        0 => None,
+        _ => Some((hand, csbi)),
+    }
+}
