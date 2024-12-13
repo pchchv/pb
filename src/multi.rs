@@ -22,3 +22,8 @@ pub struct MultiBar<T: Write> {
     chan: (Sender<WriteMsg>, Receiver<WriteMsg>),
     nbars: AtomicUsize,
 }
+
+pub struct Pipe {
+    level: usize,
+    chan: Sender<WriteMsg>,
+}
