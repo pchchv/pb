@@ -205,6 +205,39 @@ impl<T: Write> MultiBar<T> {
         p.add(0);
         p
     }
+
+    /// println used to add text lines between the bars.
+    /// i.e. you could add a header to your application,
+    /// or text separators between bars.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use pbr::MultiBar;
+    ///
+    /// let mut mb = MultiBar::new();
+    /// mb.println("Application header:");
+    ///
+    /// # let count = 250;
+    /// let mut p1 = mb.create_bar(count);
+    /// // ...
+    ///
+    /// mb.println("Text line between bar1 and bar2");
+    ///
+    /// let mut p2 = mb.create_bar(count);
+    /// // ...
+    ///
+    /// mb.println("Text line between bar2 and bar3");
+    ///
+    /// // ...
+    /// // ...
+    /// mb.listen();
+    /// ```
+    pub fn println(&self, s: &str) {
+        let mut state = self.state.lock().unwrap();
+        state.lines.push(s.to_owned());
+        state.nlines += 1;
+    }
 }
 
 pub struct Pipe {
