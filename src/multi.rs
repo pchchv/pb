@@ -1,5 +1,5 @@
-use std::io::Write;
 use std::sync::Mutex;
+use std::io::{Write, Result};
 use std::sync::atomic::AtomicUsize;
 use crossbeam_channel::{Receiver, Sender};
 
@@ -26,4 +26,10 @@ pub struct MultiBar<T: Write> {
 pub struct Pipe {
     level: usize,
     chan: Sender<WriteMsg>,
+}
+
+impl Write for Pipe {
+    fn flush(&mut self) -> Result<()> {
+        Ok(())
+    }
 }
