@@ -63,4 +63,14 @@ I: Iterator,
 T: Write,
 {
     type Item = I::Item;
+    
+    fn next(&mut self) -> Option<I::Item> {
+        match self.iter.next() {
+            Some(i) => {
+                self.progress_bar.inc();
+                Some(i)
+            }
+            None => None,
+        }
+    }
 }
