@@ -33,3 +33,18 @@ T: Write,
     iter: I,
     progress_bar: ProgressBar<T>,
 }
+
+
+impl<T, I> PbIter<T, I>
+where
+I: Iterator,
+T: Write,
+{
+    pub fn on(handle: T, iter: I) -> Self {
+        let size = iter.size_hint().0;
+        PbIter {
+            iter,
+            progress_bar: ProgressBar::on(handle, size as u64),
+        }
+    }
+}
