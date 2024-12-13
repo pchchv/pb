@@ -1,7 +1,5 @@
 use std::sync::Mutex;
-use std::io::{Write, Result};
-use std::sync::atomic::AtomicUsize;
-use crossbeam_channel::{Receiver, Sender};
+use std::str::from_utf8;
 
 struct State<T: Write> {
     lines: Vec<String>,
@@ -31,5 +29,18 @@ pub struct Pipe {
 impl Write for Pipe {
     fn flush(&mut self) -> Result<()> {
         Ok(())
+    }
+
+    fn write(&mut self, buf: &[u8]) -> Result<usize> {
+        let s = from_utf8(buf).unwrap().to_owned();
+        self.chan
+            .send(WriteMsg {
+                // finish method emit empty string
+                done: s.is_empty(),
+                level: self.level,
+                string: s,
+            })
+            .unwrap();
+        Ok(buf.len())
     }
 }
