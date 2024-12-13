@@ -12,3 +12,22 @@ pub fn terminal_size() -> Option<(Width, Height)> {
         None
     }
 }
+
+/// move the cursor `n` lines up;
+/// return an empty string,
+/// just to be aligned with the unix version.
+pub fn move_cursor_up(n: usize) -> String {
+    use winapi::um::wincon::{SetConsoleCursorPosition, COORD};
+    if let Some((hand, csbi)) = get_csbi() {
+        unsafe {
+            SetConsoleCursorPosition(
+                hand,
+                COORD {
+                    X: 0,
+                    Y: csbi.dwCursorPosition.Y - n as i16,
+                },
+            );
+        }
+    }
+    "".to_string()
+}
