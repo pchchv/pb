@@ -56,3 +56,11 @@ I: Iterator,
         Self::on(stdout(), iter)
     }
 }
+
+impl<T, I> Iterator for PbIter<T, I>
+where
+I: Iterator,
+T: Write,
+{
+    type Item = I::Item;
+}
